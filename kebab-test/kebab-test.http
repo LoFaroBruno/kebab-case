@@ -1,0 +1,6 @@
+@kebab_test_HostAddress = http://localhost:5243
+
+GET {{kebab_test_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
