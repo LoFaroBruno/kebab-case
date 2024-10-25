@@ -8,26 +8,24 @@ public class AutoRouteConvention : IApplicationModelConvention
     {
         foreach (var controller in application.Controllers)
         {
-            // Transform controller name to kebab-case
-            var controllerName = new SlugifyParameterTransformer()
-                .TransformOutbound(controller.ControllerName.Replace("Controller", ""));
+            var controllerName = ToKebabCase(controller.ControllerName);
 
             foreach (var action in controller.Actions)
             {
-                // Transform action name to kebab-case
-                var actionName = new SlugifyParameterTransformer()
-                    .TransformOutbound(action.ActionName);
+                var actionName = ToKebabCase(action.ActionName);
 
-                // Filter only parameters that should be used in the route (e.g., path parameters)
+                foreach(var p in action.Parameters)
+                {
+                    p.ParameterName = ToKebabCase(p.ParameterName);
+                }
+
                 var pathParameters = action.Parameters
-                    //.Where(p => IsRouteParameter(p)) // Custom logic to select path parameters
-                    .Select(p => $"{{{ToKebabCase(p.ParameterName)}?}}");
+                    .Select(p => $"{{{p.ParameterName}}}");
 
                 var parameters = string.Join("/", pathParameters);
 
-                var routeTemplate = $"{controllerName}/{actionName}/{parameters}".TrimEnd('/');
+                var routeTemplate = $"{controllerName}/{actionName}/{parameters}";
 
-                // Update existing selectors instead of clearing them
                 foreach (var selector in action.Selectors)
                 {
                     selector.AttributeRouteModel = new AttributeRouteModel(
@@ -35,13 +33,6 @@ public class AutoRouteConvention : IApplicationModelConvention
                 }
             }
         }
-    }
-
-    private static bool IsRouteParameter(ParameterModel parameter)
-    {
-        // Define which parameters should be treated as path parameters.
-        // Here, we assume parameters of type Guid are path parameters.
-        return parameter.ParameterType == typeof(Guid);
     }
 
     private static string ToKebabCase(string input)

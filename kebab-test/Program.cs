@@ -5,13 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-/*builder.Services.AddControllers(options =>
-{
-    options.Conventions.Add(
-        new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
-});*/
-
-
 builder.Services.AddControllers(options =>
 {
     options.Conventions.Add(new AutoRouteConvention());

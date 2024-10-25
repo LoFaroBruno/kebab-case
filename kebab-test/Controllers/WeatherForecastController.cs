@@ -31,7 +31,7 @@ namespace kebab_test.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> SomOtherGet()
+        public IEnumerable<WeatherForecast> OtroGet()
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -43,7 +43,7 @@ namespace kebab_test.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> SomOtherGetWithParams([FromRoute]Guid Id, [FromRoute]string pepe)
+        public IEnumerable<WeatherForecast> OtroGetConParametros([FromRoute]int entero, [FromRoute]string texto)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
