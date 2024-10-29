@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Linq;
+using System.Reflection.Metadata;
 
 public class AutoRouteConvention : IApplicationModelConvention
 {
@@ -21,7 +22,7 @@ public class AutoRouteConvention : IApplicationModelConvention
                 var actionName = ToKebabCase(action.ActionName);
 
                 var pathParameters = action.Parameters
-                    .Where(p => !HasBindingAttribute(p))
+                    .Where(p => IsPrimitiveOrStruct(p.ParameterType) && !HasBindingAttribute(p))
                     .Select(p => $"{{{ToKebabCase(p.ParameterName)}?}}");
 
                 var parameters = string.Join("/", pathParameters);
@@ -42,6 +43,9 @@ public class AutoRouteConvention : IApplicationModelConvention
 
     private static bool HasBindingAttribute(ParameterModel parameter) =>
     parameter.Attributes.Any(attr => attr is IBindingSourceMetadata);
+
+    private static bool IsPrimitiveOrStruct(Type type) =>
+    type.IsPrimitive || type.IsValueType || type == typeof(string);
 
     private static bool IsRouteParameter(ParameterModel parameter)
     {
