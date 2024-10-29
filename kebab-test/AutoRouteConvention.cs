@@ -1,6 +1,9 @@
 ﻿using kebab_test;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
+using System.Linq;
 
 public class AutoRouteConvention : IApplicationModelConvention
 {
@@ -12,27 +15,37 @@ public class AutoRouteConvention : IApplicationModelConvention
 
             foreach (var action in controller.Actions)
             {
+                if (action.Selectors.Any(s => s.AttributeRouteModel != null))
+                    continue;
+
                 var actionName = ToKebabCase(action.ActionName);
 
-                foreach(var p in action.Parameters)
-                {
-                    p.ParameterName = ToKebabCase(p.ParameterName);
-                }
-
                 var pathParameters = action.Parameters
-                    .Select(p => $"{{{p.ParameterName}}}");
+                    .Where(p => !HasBindingAttribute(p))
+                    .Select(p => $"{{{ToKebabCase(p.ParameterName)}?}}");
 
                 var parameters = string.Join("/", pathParameters);
 
-                var routeTemplate = $"{controllerName}/{actionName}/{parameters}";
+                var routeTemplate = $"{controllerName}/{actionName}/{parameters}".TrimEnd('/');
 
                 foreach (var selector in action.Selectors)
                 {
-                    selector.AttributeRouteModel = new AttributeRouteModel(
-                        new RouteAttribute(routeTemplate));
+                    if (selector.AttributeRouteModel == null)
+                    {
+                        selector.AttributeRouteModel = new AttributeRouteModel(
+                            new RouteAttribute(routeTemplate));
+                    }
                 }
             }
         }
+    }
+
+    private static bool HasBindingAttribute(ParameterModel parameter) =>
+    parameter.Attributes.Any(attr => attr is IBindingSourceMetadata);
+
+    private static bool IsRouteParameter(ParameterModel parameter)
+    {
+        return parameter.ParameterType == typeof(Guid);
     }
 
     private static string ToKebabCase(string input)

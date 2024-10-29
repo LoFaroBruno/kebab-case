@@ -31,7 +31,43 @@ namespace kebab_test.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> OtroGet()
+        public IEnumerable<WeatherForecast> SomOtherGet()
+        {
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
+        }
+
+        [HttpPost]
+        public IEnumerable<WeatherForecast> Post()
+        {
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
+        }
+
+        [HttpPost("weather-forecast/{id}/{pepe}/som-other-get-with-params")]
+        public IEnumerable<WeatherForecast> PostWithParams([FromRoute]int Id, [FromRoute]string pepe)
+        {
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
+        }
+
+        [HttpPost]
+        public IEnumerable<WeatherForecast> PostWithBody([FromBody] DTO dto)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -43,7 +79,7 @@ namespace kebab_test.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> OtroGetConParametros([FromRoute]int entero, [FromRoute]string texto)
+        public IEnumerable<WeatherForecast> GetWithQuery([FromQuery] string texto)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -53,5 +89,6 @@ namespace kebab_test.Controllers
             })
             .ToArray();
         }
+
     }
 }
